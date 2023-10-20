@@ -1,0 +1,118 @@
+{
+  "name": "kafka_replication_factor_violation",
+  "description": "This incident type refers to a situation where the replication factor of a Kafka cluster falls below the required threshold. Replication factor determines how many copies of a message are stored across the Kafka cluster to ensure data durability and fault tolerance. When the replication factor falls below the required level, it can lead to data loss, inconsistencies, and other issues. This incident requires immediate attention and resolution to prevent any further damage.",
+  "params": [
+    {
+      "name": "TOPIC_NAME",
+      "value": ""
+    },
+    {
+      "name": "ZOOKEEPER_CONNECTION_STRING",
+      "value": ""
+    },
+    {
+      "name": "KAFKA_BOOTSTRAP_SERVER",
+      "value": ""
+    },
+    {
+      "name": "ZOOKEEPER_PORT",
+      "value": ""
+    },
+    {
+      "name": "ZOOKEEPER_HOSTNAME",
+      "value": ""
+    },
+    {
+      "name": "HOST_NAME",
+      "value": ""
+    },
+    {
+      "name": "K8S_CLUSTER_NAME",
+      "value": ""
+    },
+    {
+      "name": "NAMESPACE",
+      "value": ""
+    }
+  ],
+  "cells": [
+    {
+      "name": "cell_1",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Kafka Replication Factor Violation.\nThis incident type refers to a situation where the replication factor of a Kafka cluster falls below the required threshold. Replication factor determines how many copies of a message are stored across the Kafka cluster to ensure data durability and fault tolerance. When the replication factor falls below the required level, it can lead to data loss, inconsistencies, and other issues. This incident requires immediate attention and resolution to prevent any further damage."
+    },
+    {
+      "name": "cell_2",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the replication factor of a topic"
+    },
+    {
+      "name": "cell_3",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `kafka-topics --zookeeper ${ZOOKEEPER_HOSTNAME}:${ZOOKEEPER_PORT} --describe --topic ${TOPIC_NAME}`"
+    },
+    {
+      "name": "cell_4",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the ISR (In-Sync Replicas) of all brokers for a topic"
+    },
+    {
+      "name": "cell_5",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `kafka-topics --zookeeper ${ZOOKEEPER_HOSTNAME}:${ZOOKEEPER_PORT} --describe --topic ${TOPIC_NAME} | grep -E '^ISR'`"
+    },
+    {
+      "name": "cell_6",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the status of all brokers in the Kafka cluster"
+    },
+    {
+      "name": "cell_7",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `kafka-broker-api-versions --bootstrap-server ${KAFKA_BOOTSTRAP_SERVER}`"
+    },
+    {
+      "name": "cell_8",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the leader status of a partition for a topic"
+    },
+    {
+      "name": "cell_9",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `kafka-topics --zookeeper ${ZOOKEEPER_HOSTNAME}:${ZOOKEEPER_PORT} --describe --topic ${TOPIC_NAME} | grep -E '^Leader'`"
+    },
+    {
+      "name": "cell_10",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Check the number of partitions for a topic"
+    },
+    {
+      "name": "cell_11",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "(host | host_name=$HOST_NAME) union (pod | k8s_cluster_name=$K8S_CLUSTER_NAME | namespace=$NAMESPACE) | `kafka-topics --zookeeper ${ZOOKEEPER_HOSTNAME}:${ZOOKEEPER_PORT} --describe --topic ${TOPIC_NAME} | grep -E '^PartitionCount'`"
+    },
+    {
+      "name": "cell_12",
+      "type": "MARKDOWN",
+      "enabled": true,
+      "content": "## Increase replication factor: The first step in resolving this incident is to increase the replication factor of the Kafka cluster to the required level. This can be done by adding new brokers to the cluster or reconfiguring the existing brokers to handle more replicas."
+    },
+    {
+      "name": "cell_13",
+      "type": "OP_LANG",
+      "enabled": true,
+      "content": "host | host_name=$HOST_NAME | invoke_increase_replication($TOPIC_NAME, $ZOOKEEPER_CONNECTION_STRING)"
+    }
+  ]
+}
